@@ -1,6 +1,6 @@
 streamlit
 opencv-python
-
+seaborn
 
 altair==5.5.0
 attrs==25.3.0
