@@ -120,7 +120,6 @@ with col1:
 
 frame_placeholder = st.empty()
 status_placeholder = st.empty()  # Add this for the status badge
-
 alert_placeholder = st.empty()
 
 # --- Video path logic ---
@@ -316,18 +315,34 @@ if show_log:
 if show_screenshots:
     import glob
     import PIL.Image
+    import io
+    import zipfile
+    import os
 
     screenshot_files = sorted(glob.glob("abnormal_screenshots/*.jpg"))
 
+    # --- Download all screenshots as ZIP ---
     if screenshot_files:
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+            for img_path in screenshot_files:
+                zip_file.write(img_path, os.path.basename(img_path))
+        zip_buffer.seek(0)
+        st.download_button(
+            label="⬇️ Download All Screenshots as ZIP",
+            data=zip_buffer,
+            file_name="abnormal_screenshots.zip",
+            mime="application/zip"
+        )
+
         st.markdown("<div class='card'><b>Abnormal Activity Screenshots</b></div>", unsafe_allow_html=True)
         for img_path in screenshot_files:
             with PIL.Image.open(img_path) as img:
                 st.image(img, caption=os.path.basename(img_path), use_column_width=True)
-        
-st.info("All detected screenshots are shown above  will be deleted automatically.")
-    # else:
-    #     st.info("No abnormal screenshots found yet.")
+            os.remove(img_path)  # Delete after displaying
+        st.info("All shown screenshots have been deleted automatically.")
+    else:
+        st.info("No abnormal screenshots found yet.")
 
 import os
 
