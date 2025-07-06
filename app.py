@@ -326,8 +326,8 @@ if show_screenshots:
                 st.image(img, caption=os.path.basename(img_path), use_column_width=True)
         
 st.info("All detected screenshots are shown above  will be deleted automatically.")
-else:
-    st.info("No abnormal screenshots found yet.")
+    # else:
+    #     st.info("No abnormal screenshots found yet.")
 
 import os
 
