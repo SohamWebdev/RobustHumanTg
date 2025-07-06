@@ -36,24 +36,25 @@ st.markdown('<div class="title">📹 Abnormal Activity Detection Dashboard</div>
 # File uploader
 uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "avi", "mov"])
 
-# Options
+# Sidebar options
 show_heatmap = st.sidebar.checkbox("Show Crowd Heatmap", value=True)
 show_screenshots = st.sidebar.checkbox("Show Abnormal Screenshots", value=True)
 
-# Load model
+# Load YOLO model
 model = YOLO("yolov8n.pt")
 
-# Abnormal behavior simulation
+# Define abnormal behavior
 def is_abnormal(detected_classes):
     count = Counter(detected_classes)
-    # Define abnormal condition (example: too many people or presence of vehicles)
     return count.get('person', 0) > 10 or any(cls in count for cls in ['car', 'truck', 'bus'])
 
+# Save screenshot of abnormal frame
 def save_screenshot(frame, label="abnormal"):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"abnormal_screenshots/{label}_{timestamp}.jpg"
     cv2.imwrite(filename, frame)
 
+# Generate heatmap image
 def save_heatmap(locations):
     if not locations:
         return
@@ -68,8 +69,12 @@ def save_heatmap(locations):
     plt.savefig(heatmap_path, bbox_inches='tight', pad_inches=0)
     plt.close()
 
-# Main detection
+# Video processing section
 if uploaded_file is not None:
+    # Delete previous screenshots
+    for file in glob.glob("abnormal_screenshots/*.jpg"):
+        os.remove(file)
+
     tfile = tempfile.NamedTemporaryFile(delete=False)
     tfile.write(uploaded_file.read())
     cap = cv2.VideoCapture(tfile.name)
@@ -130,3 +135,4 @@ if uploaded_file is not None:
                     st.image(img, caption=os.path.basename(file), use_column_width=True)
         else:
             st.info("No abnormal screenshots available.")
+
